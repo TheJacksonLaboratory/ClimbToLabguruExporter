@@ -1,7 +1,7 @@
 # ClimbToLabguruExporter
   Basic tools for working with Climb and Labguru data, and a program that exports samples from Climb into Labguru if they're not already present.
 
-## To run
+## To Run
 
 $ python ClimbToLabguruExporter.py
 
@@ -12,7 +12,7 @@ the appropriate custom inventory collection in Labguru, if a sample of that type
 does not already exist in the collection. The user can also specify that certain types of samples
 in Climb be skipped entirely (not exported).
 
-## The config file
+## The Config File
 
   In the file config.cfg, the user can set all of the variabes that control the program. These include:
 * URL endpoints to call for the various APIs provided by Climb and Labguru
