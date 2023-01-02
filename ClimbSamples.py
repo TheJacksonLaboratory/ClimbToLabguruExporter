@@ -1,6 +1,6 @@
 #!/usr/env/bin python
 
-# An API to get samples from Climb.
+# A high level API to get samples from Climb
 
 import configparser
 import logging
@@ -56,7 +56,8 @@ class ClimbSamples:
         token2 = utils.getToken(self.get_token_url, username=self.username, password=self.password)
         
         # We can't get all the samples from Climb at once due to the PageSize limit. Instead, we have to make successive
-        # calls, incrementing the PageNumber each time, until we get fewer samples than the page size.
+        # calls, incrementing the PageNumber each time, until we get fewer samples than the page size, which is set
+        # in the config file.
         page_number=1
         samples = []
         logging.info(f"Getting climb samples...")
@@ -65,6 +66,7 @@ class ClimbSamples:
                 PageNumber=page_number).get("data").get("items")
             samples += curr_samples
             if len(curr_samples) < self.page_size:
+                # Stop when we find fewer samples than the page size.
                 logging.info(f"Found {len(samples)} samples in Climb.")
                 return samples
             page_number += 1

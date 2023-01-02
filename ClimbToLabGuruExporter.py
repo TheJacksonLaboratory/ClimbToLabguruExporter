@@ -1,5 +1,7 @@
 #!/usr/env/bin python
 
+# Add all samples in Climbto LabGuru if not already present.
+
 import configparser
 import datetime
 import logging
@@ -12,13 +14,15 @@ class ClimbToLabGuruExporter:
 
     def __init__(self):
     
+        """ Add all samples in Climbto LabGuru if not already present. """
+        
         # Load config file, which is in the same directory as the source code.
         config = configparser.ConfigParser()
         src_dir = os.path.dirname(os.path.abspath(__file__))
         config.read(os.path.join(src_dir, "config.cfg"))
 
         # As this is our "main" file, we need to set up a logger.
-        self.setup_logger(config)
+        self.__setup_logger(config)
         
         self.climb_samples = ClimbSamples.ClimbSamples()
         self.labguru_collections = LabGuruBioCollections.LabGuruBioCollections()
@@ -50,7 +54,7 @@ class ClimbToLabGuruExporter:
         return samples
 
 
-    def setup_logger(self, config):
+    def __setup_logger(self, config):
 
         """ Setup logger. """
 

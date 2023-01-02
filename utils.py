@@ -1,3 +1,7 @@
+#!/usr/env/bin python
+
+# lower level utilities to interact with Climb
+
 from logging import NullHandler
 import requests
 import sys
@@ -5,16 +9,12 @@ import json
 import datetime
 import logging
 
-tokenUrl = 'http://climb-admin.azurewebsites.net/api/token'
-endpointUrl = 'https://api.climb.bio/api/'
 
-#username = your-climb-acct-name
-#password = your-climb-account-password
-
-# Global for convenience
-myToken = None
 
 def getToken(tokenUrl, username, password):
+
+    """ Get the token that the other methods here require. """
+    
     try:
         """ Given a username and password, return an access token good for an hour."""
         response = requests.get(tokenUrl,auth=(username,password))
@@ -45,6 +45,36 @@ def getToken(tokenUrl, username, password):
 
 
 def getSamples(endpointUrl, myToken, **kwargs):
+
+    """
+    
+    Get samples from Climb.
+
+    Parameters:
+    
+        endpointUrl (str): Climb's endpoint URL .
+        
+        myToken (str): The token returned by a call to getToken
+        
+
+        Keyword Arguments:
+        
+            PageSize (int): Number of desired samples per page
+            
+            PageNumber (int): Which page number the call begins on
+            
+            all_response (bool): If true, function returns the entire response
+                from Climb.
+            
+    Returns:
+    
+        samples (list) : A list of dicts, where each dict is a sample
+        
+        Note: if the all_response keyword arg is set, method instead returns the
+            entire response in JSON format.
+    
+    """
+
     try:
         call_header = {'Authorization' : 'Bearer ' + myToken}
         wgResponse = requests.get(endpointUrl+'samples', headers=call_header, params=kwargs)
@@ -115,24 +145,7 @@ def setWorkgroup(endpointUrl, myToken, workgroupName):
         raise SystemExit(f'"Could not change workgroup to {workgroupName}')
         
         
-"""
-Data package:
-{
-  "genotypeRequestDtos": [
-    {
-      "animalID": 0,
-      "plateKey": null,
-      "genotypes": [
-        {
-          "date": "string",
-          "genotypeAssayKey": 0,
-          "genotypeSymbolKey": 0
-        }
-      ]
-    }
-  ]
-}
-"""
+
 # POST example for genotypes
 def postGenotype(endpointUrl, myToken, animalId,genotypeAssayKey, genotypeSymbolKey):
     try:
@@ -167,16 +180,6 @@ def postGenotype(endpointUrl, myToken, animalId,genotypeAssayKey, genotypeSymbol
         print(e)
         raise SystemExit(e)
 
-"""
-Data package
-{
-  "animalID": 0,
-  "plateKey": null,
-  "date": "string",
-  "genotypeAssayKey": 0,
-  "genotypeSymbolKey": 0
-}
-"""
 # PUT example for genotypes
 def putGenotype(endpointUrl, myToken, animalId, genotypekey, genotypeAssayKey, genotypeSymbolKey):
     try:
