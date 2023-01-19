@@ -41,9 +41,12 @@ class ClimbToLabGuruExporter:
             
         """
         
+        num_samples_added = 0
         for sample in samples:
-            self.labguru_collections.add_sample(sample["type"], sample["name"])
-            
+            if self.labguru_collections.add_sample(sample["type"], sample["name"]):
+                num_samples_added +=1
+        logging.info(f"Added {num_samples_added} new samples.")
+        
             
     def get_all_samples_from_climb(self):
 
