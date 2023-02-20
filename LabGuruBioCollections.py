@@ -3,6 +3,7 @@
 # An interface for querying and updating our custom inventory
 # collections in LabGuru
 
+from collections import defaultdict
 import configparser
 import json
 import logging
@@ -23,7 +24,7 @@ class LabGuruBioCollections:
 	    # Load config file, which is in the same directory as the source code.
         self.config = configparser.ConfigParser()
         src_dir = os.path.dirname(os.path.abspath(__file__))
-        self.config.read(os.path.join(src_dir, "config.cfg"))
+        self.config.read(os.path.join(src_dir, "tail_only_config.cfg"))
 		
         self.request_headers = { 'accept': 'application/json',
             'Content-Type': 'application/json' }
@@ -44,9 +45,11 @@ class LabGuruBioCollections:
         self.base_url = self.sample_urls["base_url"]
         
         # We need to keep track of what samples are already in Labguru so that we don't add a sample
-        # again. Unfortunately, the system has no way to do that, so we query it and make a lookup table.
-        # Our table is a dict, where each key is a sample_type, and each value is a set containing the names
-        # of all existing samples of that type. 
+        # again. We also need to know which sample names have duplicate entries (i.e., samples with the same
+        # name. Unfortunately, the system has no way to do that, so we query it and make a lookup table.
+        # Our table is a dict, where each key is a sample_type, and each value is a dict, where the keys are
+        # each existing samples of that type, and the values are the count of how many times that sample name
+        # was found.
         self.existing_samples = {}
         self.__load_existing_samples()
 
@@ -147,6 +150,22 @@ class LabGuruBioCollections:
         short_type = self.__get_short_type(sample_type)
         val = sample_name in self.existing_samples[short_type]
         return val
+        
+    def show_duplicates(self):
+    
+        """ For all collections, print duplicate samples and dup counts. """
+        
+        total_dups = 0
+        for short_type, name_counts in self.existing_samples.items():
+            type_dups = 0
+            logging.info(f"\n\nFor sample type {short_type}:")
+            for sample_name, count in name_counts.items():
+                if count > 1:
+                    logging.debug(f"Sample {sample_name} occurs {count} times.")
+                    type_dups += 1
+            logging.info(f"Sample type {short_type} has {type_dups} duplicated samples.")
+            total_dups += type_dups
+        logging.info(f"\n\nThere were {total_dups} duplicated samples.")
 
     def __get_short_type(self, sample_type):
     
@@ -159,7 +178,7 @@ class LabGuruBioCollections:
     
         """ Find and store the names of all samples already in Labguru. """
         
-        payload = { "token" : self.token}
+        payload = { "token" : self.token, "page_size": 2500}
         
         # For each kind of sample, get a list of existing samples.
         for short_type, url in self.sample_urls.items():
@@ -169,16 +188,24 @@ class LabGuruBioCollections:
  
             response = requests.request("GET", full_url, headers=self.request_headers,
                 json=payload).text.encode('utf-8').decode("utf-8")
-            samples = json.loads(response)
-            # Put the names of all samples in a set.
-            sample_names = set()
+            try:
+                samples = json.loads(response)
+            except Exception as e:
+                logging.error(f"Could not load response for {short_type} as json. Received exception {str(e)}. Url was {url}")
+                continue
+        
+            # Make a dict of samples. Keys are names, vals are number of times that name occurred.
+            sample_names = defaultdict(int)
             for sample in samples:
                 if type(sample) is dict:
-                    sample_names.add(sample["name"])
+                    logging.debug(f"{sample}\n")
+                    # We want to track which samples are duplicates that must be deleted.
+                    self.__track_duplicates(short_type, sample)
+                    sample_names[sample["name"]] +=1
                 else:
                     logging.error(f"For {short_type}, found non-dict sample {sample}.")
                 
-            logging.info(f"For sample_type {short_type}, found samples: {sample_names}")
+            logging.debug(f"For sample_type {short_type}, found samples: {sample_names}")
             self.existing_samples[short_type] = sample_names
         
         
@@ -188,6 +215,43 @@ class LabGuruBioCollections:
         
         return sample_type in self.config["skip_samples"]
     
+    
+    def __track_duplicates(self, short_type, sample):
+    
+        """ Keep oldest sample, mark any with same name for deletion. """
+        
+        sample_name = sample["name"]
+        curr_id = sample['id']
+        curr_create_time = sample['created_at']
+        
+        # If we don't yet have this short type or sample in our tracker, insert it as a key, where the
+        # val is a dict with the id and 'created_at' time.
+        if short_type not in self._sample_tracker or sample_name not in self._sample_tracker[short_type]:
+        
+            self._sample_tracker[short_type][sample_name] = { 'id' : curr_id, 'created_at' = curr_create_time }
+            return
+            
+        # If we already have this sample, and the new one's created_at time is greater than or equal to the
+        # old one's, then put the new one's id on the deletion list. O/w, put thbe new one's id and created_at
+        # time in the tracker, and put the old one's id on the deletion list.
+        prev_id = self._sample_tracker[short_type][sample_name]['id']
+        prev_create_time = self._sample_tracker[short_type][sample_name]['created_at']
+        
+        if curr_create_time < prev_create_time:
+            # Current sample is older. Put it in the tracker, and mark the one that was there for deletion.
+            self._sample_tracker[short_type][sample_name]['id'] = curr_id
+            self._sample_tracker[short_type][sample_name]['created_at'] = curr_create_time
+            self._dups_to_delete.append(prev_id)
+        
+        else:
+            # Current sample is not older. Leave the sample in the tracker unchanged, and mark the
+            # current one for deletion.
+            self._dups_to_delete.append(curr_id)
+            
+        
+            
+        
+        
     
     
 if __name__ == "__main__":
