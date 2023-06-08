@@ -1,0 +1,1 @@
+python C:\source\repos\ClimbToLabguruExporter\ClimbToLabGuruExporter.py
