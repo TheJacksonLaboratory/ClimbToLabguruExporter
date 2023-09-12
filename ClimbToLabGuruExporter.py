@@ -1,13 +1,15 @@
 #!/usr/env/bin python
 
-# Add all samples in Climbto LabGuru if not already present.
+# Add all samples in Climb to LabGuru if not already present.
+# Email a report of all samples added.
 
 import configparser
 import datetime
 import logging
-import os
+import os, sys
 
 import ClimbSamples
+import Emailer
 import LabGuruBioCollections
 
 class ClimbToLabGuruExporter:
@@ -24,8 +26,15 @@ class ClimbToLabGuruExporter:
         # As this is our "main" file, we need to set up a logger.
         self.__setup_logger(config)
         
-        self.climb_samples = ClimbSamples.ClimbSamples()
-        self.labguru_collections = LabGuruBioCollections.LabGuruBioCollections()
+        try:
+            self.climb_samples = ClimbSamples.ClimbSamples()
+            self.emailer = Emailer.Emailer()
+            self.labguru_collections = LabGuruBioCollections.LabGuruBioCollections()
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            logging.error(f"{exc_type}\n{fname}\n{exc_tb.tb_lineno}")
+        
         
     def add_all_samples_to_labguru(self, samples):
     
@@ -41,21 +50,49 @@ class ClimbToLabGuruExporter:
             
         """
         
-        num_samples_added = 0
-        for sample in samples:
-            if self.labguru_collections.add_sample(sample["type"], sample["name"]):
-                num_samples_added +=1
-        logging.info(f"Added {num_samples_added} new samples.")
+        try:
+            num_samples_added = 0
+            for sample in samples:
+                # Attempt to add each sample. If successful, also keep track in the emailer, 
+                # which will send a report when we're done.
+                if self.labguru_collections.add_sample(sample["type"], sample["name"]):
+                    num_samples_added +=1
+                    self.emailer.add_sample(sample["type"], sample["name"])
+            logging.info(f"Added {num_samples_added} new samples.")
+            
+            # Add some fake samples to the report to test formatting
+            #self.emailer.add_sample("dog", "labrador")
+            #self.emailer.add_sample("dog", "beagle")
+            #self.emailer.add_sample("dog", "terrier")
+
+            #self.emailer.add_sample("bird", "hawk")
+            #self.emailer.add_sample("bird", "dove")
+            
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            logging.error(f"{exc_type}\n{fname}\n{exc_tb.tb_lineno}")
         
             
     def get_all_samples_from_climb(self):
 
         """ Get a list of all samples from Climb. """
         
-        samples =  self.climb_samples.get_samples()
-        logging.info(f"Found {len(samples)} total samples in Climb.")
-        return samples
+        try:
+            samples =  self.climb_samples.get_samples()
+            logging.info(f"Found {len(samples)} total samples in Climb.")
+            return samples
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            logging.error(f"{exc_type}\n{fname}\n{exc_tb.tb_lineno}")
 
+    def send_report(self):
+    
+        """ Email a report of all samples added. """
+        
+        self.emailer.send_report()
+        
 
     def __setup_logger(self, config):
 
@@ -85,7 +122,14 @@ class ClimbToLabGuruExporter:
 
 
 if __name__ == "__main__":
-    exporter = ClimbToLabGuruExporter()
-    samples = exporter.get_all_samples_from_climb()
-    exporter.add_all_samples_to_labguru(samples)
+    try:
+        exporter = ClimbToLabGuruExporter()
+        samples = exporter.get_all_samples_from_climb()
+        exporter.add_all_samples_to_labguru(samples)
+        exporter.send_report()
+        
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        logging.error(f"{exc_type}\n{fname}\n{exc_tb.tb_lineno}")
     

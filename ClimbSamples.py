@@ -20,8 +20,9 @@ class ClimbSamples:
         src_dir = os.path.dirname(os.path.abspath(__file__))
         config.read(os.path.join(src_dir, "config.cfg"))
         
-        # Get the filename containing the password and read it
-        password_filename = config["climb"]["password_file"]
+        # Get the filename containing the password and read it. It is also in the
+        # same directory as the code.
+        password_filename = os.path.join(src_dir, config["climb"]["password_file"])
         try:
             with open(password_filename) as f:
                 self.password = f.read().rstrip()
