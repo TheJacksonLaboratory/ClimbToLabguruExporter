@@ -55,6 +55,7 @@ class ClimbToLabGuruExporter:
             for sample in samples:
                 # Attempt to add each sample. If successful, also keep track in the emailer, 
                 # which will send a report when we're done.
+                   
                 if self.labguru_collections.add_sample(sample["type"], sample["name"]):
                     num_samples_added +=1
                     self.emailer.add_sample(sample["type"], sample["name"])

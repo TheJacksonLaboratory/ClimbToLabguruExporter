@@ -121,6 +121,7 @@ class LabGuruBioCollections:
 
         return False
         
+        
     def get_description(self, sample_type):
     
         """ Get the description to be added to the sample. """
@@ -132,7 +133,7 @@ class LabGuruBioCollections:
         short_type = self.__get_short_type(sample_type)
         desc = self.sample_descriptions[short_type]
         # There some special cases. This handling is a hack but will suffice.
-        if short_type == "Kidney":
+        if short_type == "kidney":
             if "Left" in sample_type:
                 desc = "Left Kidney"
             elif "Right" in sample_type:
@@ -145,7 +146,7 @@ class LabGuruBioCollections:
     def get_url(self, sample_type):
     
         """ Get the custom collection URL for adding samples of the given type. """
-        
+            
         # Determine whether we should skip this kind of sample
         if self.__skip_samples(sample_type):
             logging.debug(f"Skipping sample of type {sample_type}.")
@@ -175,7 +176,7 @@ class LabGuruBioCollections:
         """ Build a map of short types to URL. """
         
         for sample_key, url in self.sample_urls.items():
-            short_type = self.__get_short_type(url)
+            short_type = self.__get_short_type(sample_key)
             self._url_lookup[short_type] = url
 
 
