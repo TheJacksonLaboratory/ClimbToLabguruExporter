@@ -2,6 +2,7 @@
 
 # A high level API to get samples from Climb
 
+from collections import defaultdict
 import configparser
 import logging
 import os
@@ -71,3 +72,29 @@ class ClimbSamples:
                 logging.info(f"Found {len(samples)} samples in Climb.")
                 return samples
             page_number += 1
+
+if __name__ == "__main__":
+
+    # Run by itself, this code just prints out a count of each sample type.
+
+    # Get all the samples
+    climb_samples = ClimbSamples()
+    samples = climb_samples.get_samples()
+    
+    # Create the histogram countiung each sample type.
+    type_histogram = defaultdict(int)
+    id_counter = defaultdict(set)
+    for sample in samples:
+        type_histogram[sample['type']] +=1
+        id_counter[sample['type']].add(sample['sampleID'])
+        
+    # Print the histrogram
+    sorted_keys = sorted(type_histogram.keys())
+    for sample_type in sorted_keys:
+        type_count = type_histogram[sample_type]
+        id_count = len(id_counter[sample_type])
+        print(f"{sample_type}: {type_count}, id_count: {id_count}")
+        
+        
+        
+        
