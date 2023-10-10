@@ -1,16 +1,23 @@
 # ClimbToLabguruExporter
   Basic tools for working with Climb and Labguru data, and a program that exports samples from Climb into Labguru if they're not already present.
 
-## To Run
-
-$ python ClimbToLabguruExporter.py
-
 ## What it Does
 
 The program will grab all samples in Climb for a given workgroup. Each sample will be added to
 the appropriate custom inventory collection in Labguru, if a sample of that type with that name
 does not already exist in the collection. The user can also specify that certain types of samples
 in Climb be skipped entirely (not exported).
+
+## Run Environment
+The exporter currently runs twice per day on our windows server, `bhlit01wd.jax.org`. 
+
+Here, it is deployed at `C:\source\repos\ClimbToLabguruExporter`. 
+
+The `exporter.bat` file in this directory is scheduled and launched via the Windows Task Scheduler.
+
+This job calls the `__main__` section of `ClimbToLabGuruExporter.py`.
+
+The directory also contains the `config.cfg` file, which has all other pertinent run information. See below.
 
 ## The Config File
 
