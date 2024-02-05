@@ -29,7 +29,7 @@ The directory also contains the `config.cfg` file, which has all other pertinent
 * locations of password and token files
 * log file directory and logging levels
 
-## A critical note on the Labguru token
+## A Critical Note on the Labguru Token
 The Labguru API token (see "labguru_token_file" under "[Credentials]" in the config file) expires after one year.
 It was inititally issued in Dec 2022 and has now been renewed as of Feb 5 2024. When it expires again, we must request
 a renewal by mailing support@biodata.com. Include the last 6 digits of the token in the body of the email when sending the renewal request.
