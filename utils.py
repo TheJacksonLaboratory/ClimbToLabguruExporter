@@ -140,10 +140,7 @@ def setWorkgroup(endpointUrl, myToken, workgroupName):
             success = True
 
     # If successful, remember to get a new access token!
-    if success == False:
-        print(f'"Could not change workgroup to {workgroupName}')
-        raise SystemExit(f'"Could not change workgroup to {workgroupName}')
-        
+    return success        
         
 
 # POST example for genotypes

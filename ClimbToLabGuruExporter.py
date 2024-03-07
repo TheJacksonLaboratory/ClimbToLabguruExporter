@@ -60,19 +60,11 @@ class ClimbToLabGuruExporter:
                     num_samples_added +=1
                     self.emailer.add_sample(sample["type"], sample["name"])
             logging.info(f"Added {num_samples_added} new samples.")
-            
-            # Add some fake samples to the report to test formatting
-            #self.emailer.add_sample("dog", "labrador")
-            #self.emailer.add_sample("dog", "beagle")
-            #self.emailer.add_sample("dog", "terrier")
-
-            #self.emailer.add_sample("bird", "hawk")
-            #self.emailer.add_sample("bird", "dove")
-            
+                        
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            logging.error(f"{exc_type}\n{fname}\n{exc_tb.tb_lineno}")
+            logging.error(f"{exc_type} in {fname}:{exc_tb.tb_lineno}")
         
             
     def get_all_samples_from_climb(self):
@@ -132,5 +124,5 @@ if __name__ == "__main__":
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logging.error(f"{exc_type}\n{fname}\n{exc_tb.tb_lineno}")
+        logging.error(f"{exc_type} in {fname}:{exc_tb.tb_lineno}")
     

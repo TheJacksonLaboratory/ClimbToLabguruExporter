@@ -38,8 +38,8 @@ class Emailer:
         self.all_samples = defaultdict(list)
         
         # Save the name of the workgroup, to be included in the report
-        self.climb_workgroup = config["climb"]["workgroup_name"]
-
+        self.climb_workgroups = [x.strip() for x in config["climb"]["workgroup_names"].split(',')]
+        
     def add_sample(self, sample_type, sample_name):
     
         """
@@ -58,7 +58,7 @@ class Emailer:
         msg = MIMEMultipart()
         msg["From"] = self.mail_conf["From"]
         msg["To"] = self.mail_conf["To"]
-        msg["Subject"] = self.climb_workgroup + ' ' + self.mail_conf["Subject"]
+        msg["Subject"] = ','.join(self.climb_workgroups) + ' ' + self.mail_conf["Subject"]
         msg.attach(MIMEText(self.get_report_body(), 'html'))
         return msg
 
