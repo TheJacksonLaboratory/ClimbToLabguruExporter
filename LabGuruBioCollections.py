@@ -257,7 +257,7 @@ class LabGuruBioCollections:
                     
                 if not curr_samples:
                     break
-                logging.debug(f"Found {len(curr_samples)} samples.")
+                logging.debug(f"Loading labguru sampls, found {len(curr_samples)} {short_type} samples on page {curr_page} .")
                
                 for sample in curr_samples:
                     if type(sample) is dict:
