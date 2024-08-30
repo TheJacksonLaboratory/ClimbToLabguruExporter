@@ -1,1 +1,0 @@
-"C:\Program Files\Python310\python.exe" C:\source\repos\ClimbToLabguruExporter\ClimbToLabGuruExporter.py
