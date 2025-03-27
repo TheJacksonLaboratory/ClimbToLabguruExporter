@@ -26,6 +26,9 @@ class ClimbToLabGuruExporter:
         # As this is our "main" file, we need to set up a logger.
         self.__setup_logger(config)
         
+        # Get the name of the sentinal file to be written upon completion of the export.
+        self.sentinal_filename = config["logging"]["sentinal_file"]
+        
         try:
             self.climb_samples = ClimbSamples.ClimbSamples()
             self.emailer = Emailer.Emailer()
@@ -86,6 +89,13 @@ class ClimbToLabGuruExporter:
         
         self.emailer.send_report()
         
+        
+    def write_sentinal_file(self):
+        
+        """ Write the sentinal file, marking the job as done. """
+        with open(self.self.sentinal_filename, 'w') as f:
+            f.write("Job done.")
+            
 
     def __setup_logger(self, config):
 
@@ -120,6 +130,7 @@ if __name__ == "__main__":
         samples = exporter.get_all_samples_from_climb()
         exporter.add_all_samples_to_labguru(samples)
         exporter.send_report()
+        exporter.write_sentinal_file()
         
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
