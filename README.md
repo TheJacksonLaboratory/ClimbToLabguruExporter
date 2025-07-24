@@ -9,11 +9,13 @@ does not already exist in the collection. The user can also specify that certain
 in Climb be skipped entirely (not exported).
 
 ## Run Environment
-The exporter currently runs twice per day on our windows server, `bhlit01wd.jax.org`. 
+The exporter currently runs once per day at 3pm EST on our windows server, `bhlit01wp.jax.org`. 
 
 Here, it is deployed at `C:\source\repos\ClimbToLabguruExporter`. 
 
 The `exporter.bat` file in this directory is scheduled and launched via the Windows Task Scheduler.
+
+Log files for all runs are kept at `C:\AppLogs\ClimbToLabguruExportLogs.`
 
 This job calls the `__main__` section of `ClimbToLabGuruExporter.py`.
 
